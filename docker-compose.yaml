@@ -1,0 +1,32 @@
+version: '3'
+services:
+  mongodb:
+    image: mongo
+    container_name: my_mongo_db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example_password
+    networks:
+      - my_network  
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi_app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+    links:
+      - mongodb:mongodb
+    environment:
+      - DATABASE_URL=mongodb://root:example_password@mongodb:27017
+
+    networks:
+      - my_network  
+
+networks:
+  my_network:
